@@ -1,0 +1,7 @@
+smyt/.idea/
+smyt/.project
+smyt/.pydevproject
+smyt/.settings/*
+*.pyc
+smyt/dclass/migrations/*
+smyt/db.sqlite3

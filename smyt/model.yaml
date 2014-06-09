@@ -1,0 +1,17 @@
+users:
+    title: Пользователь
+    title_plural: Пользователи
+    app_label: Динамически
+    fields: 
+        - {id: name, title: Имя, type: chr}
+        - {id: paycheck, title: Зарплата, type: int}
+        - {id: date_joined, title: Дата поступления на работу, type: date}
+
+rooms:
+    title: Комната
+    title_plural: Комнаты
+    app_label: Динамически
+    fields: 
+        - {id: department, title: Отдел, type: chr}
+        - {id: spots, title: Вместимость, type: int}
+        

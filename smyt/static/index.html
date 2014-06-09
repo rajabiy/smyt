@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap 101 Template</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+
+  <div class="row" style="margin: auto; position: absolute; left: 0; right: 0; top: 0; bottom: 0">
+      <h2> </h2>
+        <div class="span2">
+        <ul class="nav nav-tabs nav-stacked" id="models">
+        </ul>
+        </div>
+        <div class="span10">
+            <table class="table table-bordered" id="datatab"></table>
+        </div>      
+  </div>
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+      <script>
+          function loadTable(name){
+              $.get('/api/'+name+'/', {'format':'json'}, onGetTable);
+              
+              };
+          function onGetTable(data){
+              var table = $('#datatab');
+              table.html('');
+              var row = $('<tr />').appendTo(table);
+              for (key in data[0]){
+                  var td = $('<td/>')
+                  .text(key)
+                  .appendTo(row);};
+              
+              $(data).each(function(index, item){ 
+                  var row = $('<tr />').appendTo(table);
+                  for (key in item){
+                      var td = $('<td/>')
+                      .text(item[key])
+                      .appendTo(row);};
+              }); 
+          };
+          function onGetModels(data){
+              var cList = $('ul#models');
+              $(data).each(function(index, item){ 
+                  var li = $('<li/>')
+                  .appendTo(cList);
+                  var aaa = $('<a/>')
+                  .attr('onclick','loadTable("'+item+'");')
+                  .attr('href','#')
+                  .text(item)
+                  .appendTo(li);
+              });
+              
+              };
+          $(document).ready(function(){$.get('/api/',{}, onGetModels)});
+
+      </script>        
+  </body>
+</html>
