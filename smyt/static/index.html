@@ -16,6 +16,7 @@
         </div>
         <div class="span10">
             <table class="table table-bordered" id="datatab"></table>
+            <p id="#log"></p>
         </div>      
   </div>
     <script src="http://code.jquery.com/jquery.js"></script>
@@ -23,23 +24,35 @@
       <script>
           function loadTable(name){
               $.get('/api/'+name+'/', {'format':'json'}, onGetTable);
-              
               };
+
+          function onDataClick()
+          {
+            $('<a/>')
+            .appendTo($('#log'));
+          }
+
           function onGetTable(data){
               var table = $('#datatab');
               table.html('');
               var row = $('<tr />').appendTo(table);
               for (key in data[0]){
                   var td = $('<td/>')
-                  .text(key)
+                  .text(data[0][key].title)
                   .appendTo(row);};
               
-              $(data).each(function(index, item){ 
+              $(data[1]).each(function(index, item){
                   var row = $('<tr />').appendTo(table);
                   for (key in item){
                       var td = $('<td/>')
+                      .appendTo(row);
+                      var aa = $('<a/>')
                       .text(item[key])
-                      .appendTo(row);};
+                      .attr('onclick','onDataClick();')
+                      .attr('href','#')
+                      .appendTo(td);
+                      aa.data(data[0][key]);};
+
               }); 
           };
           function onGetModels(data){
