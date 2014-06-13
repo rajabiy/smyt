@@ -3,7 +3,9 @@
   <head>
     <title>Bootstrap 101 Template</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap -->
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
   <body>
@@ -20,17 +22,53 @@
         </div>      
   </div>
     <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="js/bootstrap.min.js"></script>
-      <script>
+      <script type="text/javascript">
           function loadTable(name){
               $.get('/api/'+name+'/', {'format':'json'}, onGetTable);
               };
 
-          function onDataClick()
+          function onDataClick(caller)
           {
-            $('<a/>')
-            .appendTo($('#log'));
+            var a = $(caller)
+            var data  = a.data();
+            $(caller).replaceWith('<input id=' + caller.id + ' />');
+            var input = $('input#'+caller.id)
+            input.val(a.text());
+            input.data(data);
+            var dd = input.data();
+            if (dd.type=='date'){
+            input.datepicker({dateFormat: "yy-mm-dd"});
+            };
+
+            var aa = $('<a/>')
+            .text('Сохранить')
+            .attr('onclick','onSave("' + 'input#'+caller.id+'");')
+            .attr('href','#')
+            .appendTo(input.parent());
           }
+
+          function onSave(input)
+            {
+                var input = $(input);
+                var data = input.data();
+                var result = true
+                if (data.type == 'int')
+                {
+                input.val().replace(/[^0-9]/g,
+                function(str) { input.parent().parent().addClass('error'); result = false});
+                result=result;
+                }
+                if (result)
+                {
+                $.post('/api/'+data.model+'/' + data.id+'/', {'format':'json',
+                                                              'id': data.id,
+                                                              'field': data.field,
+                                                              'value': input.val()}, onGetTable);;
+                                                              }
+
+            }
 
           function onGetTable(data){
               var table = $('#datatab');
@@ -46,12 +84,23 @@
                   for (key in item){
                       var td = $('<td/>')
                       .appendTo(row);
+                      if (key!='id')
+                      {
                       var aa = $('<a/>')
                       .text(item[key])
-                      .attr('onclick','onDataClick();')
+                      .attr('onclick','onDataClick(this);')
                       .attr('href','#')
+                      .attr('id', key + '-' +item['id'])
                       .appendTo(td);
-                      aa.data(data[0][key]);};
+                      aa.data(data[0][key]);
+                      aa.data('id', item['id']);
+                      aa.data('field', key);
+                      }
+                      else
+                      {
+                      td.text(item[key])
+                      }
+                      };
 
               }); 
           };

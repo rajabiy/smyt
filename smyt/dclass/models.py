@@ -17,7 +17,10 @@ for key, value in yaml_models.iteritems():
     fields = {'id': {'title': 'id', 'type': 'int'}}
 
     for field in value.get('fields'):
-        fields[field.get('id')] = field
+        f_types = field
+        f_id = f_types.pop('id', None)
+        f_types['model'] = model._meta.verbose_name
+        fields[f_id] = f_types
 
     models_fields[model._meta.verbose_name] = fields
 
