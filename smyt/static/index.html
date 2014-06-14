@@ -25,6 +25,40 @@
     <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="js/bootstrap.min.js"></script>
       <script type="text/javascript">
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            crossDomain: false, // obviates need for sameOrigin test
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type)) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+
+        });
+      </script>
+
+<script type="text/javascript">
           function loadTable(name){
               $.get('/api/'+name+'/', {'format':'json'}, onGetTable);
               };
@@ -75,17 +109,21 @@
               table.html('');
               var row = $('<tr />').appendTo(table);
               for (key in data[0]){
-                  var td = $('<td/>')
-                  .text(data[0][key].title)
-                  .appendTo(row);};
+                    if (key!='id')
+                    {
+                    var td = $('<td/>')
+                    .text(data[0][key].title)
+                    .appendTo(row);
+                    }
+                  };
               
               $(data[1]).each(function(index, item){
                   var row = $('<tr />').appendTo(table);
                   for (key in item){
-                      var td = $('<td/>')
-                      .appendTo(row);
                       if (key!='id')
                       {
+                      var td = $('<td/>')
+                      .appendTo(row);
                       var aa = $('<a/>')
                       .text(item[key])
                       .attr('onclick','onDataClick(this);')
@@ -96,15 +134,12 @@
                       aa.data('id', item['id']);
                       aa.data('field', key);
                       }
-                      else
-                      {
-                      td.text(item[key])
-                      }
                       };
 
               });
               addForm(data[0]);
           };
+
           function onGetModels(data){
               var cList = $('ul#models');
               $(data).each(function(index, item){ 
@@ -117,29 +152,74 @@
                   .appendTo(li);
               });
               
-              };
+          };
 
-          function addForm(model)
-          {
-              var form_div = $('#form');
-              form_div.html('');
-              var form = $('<form />').attr('class', 'form-inline').appendTo(form_div);
-              for (key in model)
-              {
-                if (key != 'id')
-                  {
-                  var td = $('<input />')
-                  .attr('type', 'text')
-                  .attr('class', 'input-small')
-                  .attr('placeholder', model[key].title)
-                  .appendTo(form);};
-                  }
-              $('<button />')
-              .attr('type', 'submit')
-              .attr('class', 'btn')
-              .text('Добавить')
-              .appendTo(form)
-          }
+          function addForm(model){
+            var form_div = $('#form');
+            form_div.html('');
+            var form = $('<form />').attr('class', 'form-inline').appendTo(form_div);
+            var row = $('<div />')
+            .attr('class', 'row')
+            .appendTo(form);
+            for (key in model){
+                if (key != 'id') {
+                    var div = $('<div />')
+                    .attr('class', 'control-group span2')
+                    .appendTo(row);
+                    var input = $('<input />')
+                    .attr('type', 'text')
+                    .attr('class', 'input-small span2')
+                    .attr('placeholder', model[key].title)
+                    .data(model[key])
+                    .data('id', key)
+                    .appendTo(div);
+                    if (model[key].type == 'date'){
+                    input.datepicker({dateFormat: "yy-mm-dd"});
+                    };
+                };
+            };
+                $('<a />')
+                .attr('class', 'btn')
+                .attr('onclick', 'addRecord()')
+                .text('Добавить')
+                .appendTo(row);
+          };
+
+          function addRecord(){
+            var obj={};
+            var result = true
+            var model = '';
+            $('div#form form input').each(function(index, item){
+                var item = $(item);
+                var data = item.data();
+                model = data.model;
+                if (item.val() == ''){
+                    item.parent().removeClass('success');
+                    item.parent().addClass('error');
+                    result = false;
+                }
+                else
+                {
+                    item.parent().removeClass('error');
+                    item.parent().addClass('success');
+                };
+                obj[item.data().id] = item.val();
+                if (data.type == 'int'){
+                    item.val().replace(/[^0-9]/g,
+                    function(str) {
+                        item.parent().removeClass('success');
+                        item.parent().addClass('error');
+                        result = false
+                    });
+                }
+              });
+            console.log(obj);
+            if (result){
+            $.post('/api/'+model+'/', obj, onGetTable);
+
+            }
+
+          };
           $(document).ready(function(){$.get('/api/',{}, onGetModels)});
 
       </script>        

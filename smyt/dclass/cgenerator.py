@@ -1,7 +1,7 @@
 # coding=utf-8
 from django.db import models
 
-
+#генереируем модель
 def gen_model(key, value):
     fields = dict()
     for field in value.get('fields'):

@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from django.forms.models import model_to_dict
-# Create your views here.
 
 from dclass.models import models_dict, models_fields
+from dclass.serializers import serializers_dict
 from rest_framework.response import Response
 
 
@@ -19,6 +19,20 @@ class Model(APIView):
         data = []
         if model:
             chosed_model = models_dict[model]
+            data.append(models_fields[model])
+            data.append(chosed_model.objects.all().values())
+        return Response(data)
+
+    def post(self, request, fomat=None, model=None):
+        data = []
+        if model:
+            chosed_model = models_dict[model]
+            chosed_serializer = serializers_dict[model]
+
+            serializer = chosed_serializer(data=request.DATA)
+
+            if serializer.is_valid():
+                serializer.save()
             data.append(models_fields[model])
             data.append(chosed_model.objects.all().values())
         return Response(data)
