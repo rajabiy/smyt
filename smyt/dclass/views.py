@@ -1,3 +1,4 @@
+# coding=utf-8
 from rest_framework.views import APIView
 from django.forms.models import model_to_dict
 
